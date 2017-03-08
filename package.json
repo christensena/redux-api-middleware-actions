@@ -1,0 +1,30 @@
+{
+  "name": "redux-typed-async-actions",
+  "version": "0.0.1",
+  "description": "Attempt to get strongly typed async actions with matching reducer helpers in Redux",
+  "main": "build/index.js",
+  "typings": "build/index.d.ts",
+  "author": "Alan Christensen <alan@christensen.org.nz>",
+  "license": "MIT",
+  "scripts": {},
+  "devDependencies": {
+    "jest": "^19.0.2",
+    "ts-jest": "^19.0.0",
+    "typescript": "^2.2.1"
+  },
+  "dependencies": {
+    "redux": "^3.6.0"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "testResultsProcessor": "<rootDir>/node_modules/ts-jest/coverageprocessor.js"
+  }
+}
