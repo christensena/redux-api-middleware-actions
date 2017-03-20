@@ -2,6 +2,7 @@ import * as Redux from 'redux';
 
 export interface Action<TPayload> extends Redux.Action {
   payload: TPayload;
+  meta?: any;
 }
 
 export interface CreateAction<TPayload> extends Action<TPayload> {
@@ -56,13 +57,13 @@ export interface ApiAction<TResponse> extends Action<TResponse> {
 }
 
 export interface CreateApiAsyncAction<ApiParams, TResponse, TPayload> {
-  (params: ApiParams, payload?: TPayload): Redux.Action;
+  (params: ApiParams, payload?: TPayload): Action<TPayload>;
   matches(action: Redux.Action): action is ApiAction<TResponse>
-  getApiResponse(action: Redux.Action): action is ApiAction<TResponse>
+  matchApiResponse(action: Redux.Action): action is ApiAction<TResponse>
 }
 
 export const createApiAsyncAction = <TApiParams, TResponse, TPayload>(type: string): CreateApiAsyncAction<TApiParams, TResponse, TPayload> => {
-  let creator: any = (apiParams: TApiParams, payload?: TPayload) => ({
+  let creator: any = (apiParams: TApiParams, payload: TPayload): Action<TPayload> => ({
     type,
     payload,
     meta: {

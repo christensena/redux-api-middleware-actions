@@ -1,23 +1,24 @@
 import {
   createAction, createApiAsyncAction,
-  CreateApiAsyncAction, Action, ApiAction, GetApiParams
+  CreateApiAsyncAction, Action, ApiAction,
+  GetApiParams, PutApiParams
 } from './action-creators';
 
-interface IEntityId {
+interface IUserId {
   id: number;
 }
 
-interface IEntity {
+interface IUser {
   name: string;
 }
 
 describe('action-creators', () => {
 
   describe('createAction with typed payload', () => {
-    let action: Action<IEntityId>;
+    let action: Action<IUserId>;
 
     beforeEach(() => {
-      const actionCreator = createAction<IEntityId>('ACTION_NAME');
+      const actionCreator = createAction<IUserId>('ACTION_NAME');
       action = actionCreator({ id: 123 });
     });
 
@@ -32,27 +33,32 @@ describe('action-creators', () => {
   });
 
   describe('createApiAsyncAction with typed payload', () => {
-    let action: Action<{}>;
+    let action: Action<IUser>;
     let url: string;
-    let actionCreator: CreateApiAsyncAction<GetApiParams, {}>;
+    let actionCreator: CreateApiAsyncAction<PutApiParams, IUserId, IUser>;
 
     beforeEach(() => {
       const id = 123;
       url = `/entity/${id}`;
-      actionCreator = createApiAsyncAction<GetApiParams, IEntityId, {}>('GET_ENTITY');
-      action = actionCreator({ url, method: 'GET' });
+      actionCreator = createApiAsyncAction<PutApiParams, IUserId, IUser>('PUT_USER');
+      action = actionCreator({ url, method: 'PUT' }, { name: 'Alan' });
     });
 
     it('should have expected payload', () => {
       expect(action).toEqual({
-        type: 'GET_ENTITY',
+        type: 'PUT_USER',
+        payload: { name: 'Alan' },
         meta: {
           apiParams: {
-            method: 'GET',
+            method: 'PUT',
             url,
           }
         }
       });
+    });
+
+    it('should recognise itself with matchApiResponse', () => {
+      expect(actionCreator.matchApiResponse(action)).toBeTruthy();
     });
 
     it('should recognise itself with matchApiResponse', () => {
