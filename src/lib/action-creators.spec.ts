@@ -1,7 +1,7 @@
 import {
-  createAction, createApiAsyncAction,
-  CreateApiAsyncAction, Action, ApiAction,
-  GetApiParams, PutApiParams
+  Action,
+  createAction, createApiAsyncAction, CreateApiAsyncAction,
+  PutApiParams,
 } from './action-creators';
 
 interface IUserId {
@@ -27,7 +27,7 @@ describe('action-creators', () => {
         type: 'ACTION_NAME',
         payload: {
           id: 123,
-        }
+        },
       });
     });
   });
@@ -35,12 +35,12 @@ describe('action-creators', () => {
   describe('createApiAsyncAction with typed payload', () => {
     let action: Action<IUser>;
     let url: string;
-    let actionCreator: CreateApiAsyncAction<PutApiParams, IUserId, IUser>;
+    let actionCreator: CreateApiAsyncAction<PutApiParams, {}, IUser>;
 
     beforeEach(() => {
       const id = 123;
       url = `/entity/${id}`;
-      actionCreator = createApiAsyncAction<PutApiParams, IUserId, IUser>('PUT_USER');
+      actionCreator = createApiAsyncAction<{}, IUser>('PUT_USER');
       action = actionCreator({ url, method: 'PUT' }, { name: 'Alan' });
     });
 
@@ -52,8 +52,8 @@ describe('action-creators', () => {
           apiParams: {
             method: 'PUT',
             url,
-          }
-        }
+          },
+        },
       });
     });
 
