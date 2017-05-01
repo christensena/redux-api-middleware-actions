@@ -1,5 +1,6 @@
 import {
   Action,
+  ApiAction,
   createAction, createApiAsyncAction, CreateApiAsyncAction,
   PutApiParams,
 } from './action-creators';
@@ -33,7 +34,7 @@ describe('action-creators', () => {
   });
 
   describe('createApiAsyncAction with typed payload', () => {
-    let action: Action<IUser>;
+    let action: ApiAction<{}, IUser>;
     let url: string;
     let actionCreator: CreateApiAsyncAction<PutApiParams, {}, IUser>;
 
@@ -44,25 +45,37 @@ describe('action-creators', () => {
       action = actionCreator({ url, method: 'PUT' }, { name: 'Alan' });
     });
 
-    it('should have expected payload', () => {
+    it('should have expected CALL_API', () => {
       expect(action).toEqual({
         type: 'PUT_USER',
-        payload: { name: 'Alan' },
-        meta: {
-          apiParams: {
-            method: 'PUT',
-            url,
-          },
+        CALL_API: {
+          endpoint: url,
+          method: 'PUT',
+          types: ['PUT_USER', 'PUT_USER_SUCCESS', 'PUT_USER_FAILURE'],
+          body: { name: 'Alan' },
         },
       });
     });
 
-    it('should recognise itself with matchApiResponse', () => {
-      expect(actionCreator.matchApiResponse(action)).toBeTruthy();
+    it('should recognise itself with matches', () => {
+      expect(actionCreator.matches(action)).toBeTruthy();
     });
 
-    it('should recognise itself with matchApiResponse', () => {
-      expect(actionCreator.matchApiResponse(action)).toBeTruthy();
+    it('should recognise success derivative with matchApiResponse', () => {
+      const responseAction = {
+        type: 'PUT_USER_SUCCESS',
+        payload: {},
+      }
+      expect(actionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
+    });
+
+    it('should recognise failure derivative with matchesSuccessResponse', () => {
+      const responseAction = {
+        type: 'PUT_USER_FAILURE',
+        payload: new Error('Error'),
+        error: true,
+      }
+      expect(actionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
     });
   });
 

@@ -1,22 +1,29 @@
-import * as Redux from 'redux';
+// rather than depend on external lib for just this...
+export interface ReduxAction {
+  type: string;
+}
 
-export interface Action<TPayload> extends Redux.Action {
+export interface ErrorAction extends ReduxAction {
+  payload: any;
+  error: boolean;
+}
+
+export interface Action<TPayload> extends ReduxAction {
   payload: TPayload;
 }
 
 export interface CreateAction<TPayload> extends Action<TPayload> {
   (payload?: TPayload): Action<TPayload>;
-  matches(action: Redux.Action): action is Action<TPayload>;
+  matches(action: ReduxAction): action is Action<TPayload>;
 }
 
 export const createAction = <TPayload>(type: string): CreateAction<TPayload> => {
   let creator: any = <TPayload>(payload?: TPayload) => ({type, payload});
-  creator.matchAction = <TPayload>(action: Redux.Action): action is Action<TPayload> => action.type === type;
-
+  creator.matchAction = <TPayload>(action: ReduxAction): action is Action<TPayload> => action.type === type;
   return <CreateAction<TPayload>> creator;
 };
 
-export type HttpMethod = 'GET' | 'PUT' | 'POST' | 'DELETE';
+export type HttpMethod = 'GET' | 'PUT' | 'POST' | 'DELETE' | 'OPTIONS';
 
 export interface IApiParamsWithMethod {
   method: HttpMethod;
@@ -51,29 +58,41 @@ export type ApiParams =
   PutApiParams |
   PostApiParams;
 
-export interface ApiAction<TPayload, TResponse> extends Action<TPayload> {
-  meta: {
-    apiParams: ApiParams;
-  };
+export interface ApiAction<TPayload, TResponse> extends ReduxAction {
+  'CALL_API': {
+    endpoint: string;
+    method: HttpMethod;
+    types: string[];
+    body?: any;
+    headers?: any;
+  },
 }
 
 export interface CreateApiAsyncAction<ApiParams, TResponse, TPayload> {
-  (params: ApiParams, payload?: TPayload): Action<TPayload>;
-  matches(action: Redux.Action): action is ApiAction<TPayload, TResponse>;
-  matchApiResponse(action: Redux.Action): action is ApiAction<TPayload, TResponse>;
+  (params: ApiParams, payload?: TPayload): ApiAction<TPayload, TResponse>;
+  matches(action: ReduxAction): action is ApiAction<TPayload, TResponse>;
+  matchesSuccessResponse(action: Action<TResponse>): action is Action<TResponse>;
+  matchesFailureResponse(action: ErrorAction): action is ErrorAction;
 }
 
 export const createApiAsyncAction =
   <TResponse, TPayload>(type: string): CreateApiAsyncAction<ApiParams, TResponse, TPayload> => {
+    const successType = `${type}_SUCCESS`;
+    const failureType = `${type}_FAILURE`;
     let creator: any = (apiParams: ApiParams, payload: TPayload): ApiAction<TPayload, TResponse> => ({
       type,
-      payload,
-      meta: {
-        apiParams,
+      'CALL_API': {
+        endpoint: apiParams.url,
+        method: apiParams.method,
+        types: [type, successType, failureType],
+        body: payload,
       },
     });
-    creator.matchApiResponse =
-      <TResponse>(action: Redux.Action): action is ApiAction<TPayload, TResponse> => action.type === type;
-    // creator.getApiResponse = (action: Action<TResponse>): (action: Action<TResponse>) => action.payload;
+    creator.matches =
+      <TResponse>(action: ReduxAction): action is ApiAction<TPayload, TResponse> => action.type === type;
+    creator.matchesSuccessResponse =
+      (action: Action<TResponse>): action is Action<TResponse> => action.type === successType;
+    creator.matchesFailureResponse =
+      (action: ErrorAction): action is ErrorAction => action.type === failureType;
     return <CreateApiAsyncAction<ApiParams, TResponse, TPayload>> creator;
   };
