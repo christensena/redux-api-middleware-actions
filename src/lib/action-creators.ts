@@ -58,6 +58,8 @@ export type ApiParams =
   PutApiParams |
   PostApiParams;
 
+// TODO could break this down by method and hence exclude body from GET and DELETE
+// TODO flesh out header typing and add it to ApiAction
 export interface ApiAction<TPayload, TResponse> extends ReduxAction {
   'CALL_API': {
     endpoint: string;
@@ -68,7 +70,7 @@ export interface ApiAction<TPayload, TResponse> extends ReduxAction {
   },
 }
 
-export interface CreateApiAsyncAction<ApiParams, TResponse, TPayload> {
+export interface CreateApiAsyncAction<ApiParams, TPayload, TResponse> {
   (params: ApiParams, payload?: TPayload): ApiAction<TPayload, TResponse>;
   matches(action: ReduxAction): action is ApiAction<TPayload, TResponse>;
   matchesSuccessResponse(action: Action<TResponse>): action is Action<TResponse>;
@@ -76,7 +78,7 @@ export interface CreateApiAsyncAction<ApiParams, TResponse, TPayload> {
 }
 
 export const createApiAsyncAction =
-  <TResponse, TPayload>(type: string): CreateApiAsyncAction<ApiParams, TResponse, TPayload> => {
+  <TPayload, TResponse>(type: string): CreateApiAsyncAction<ApiParams, TPayload, TResponse> => {
     const successType = `${type}_SUCCESS`;
     const failureType = `${type}_FAILURE`;
     let creator: any = (apiParams: ApiParams, payload: TPayload): ApiAction<TPayload, TResponse> => ({
@@ -94,5 +96,5 @@ export const createApiAsyncAction =
       (action: Action<TResponse>): action is Action<TResponse> => action.type === successType;
     creator.matchesFailureResponse =
       (action: ErrorAction): action is ErrorAction => action.type === failureType;
-    return <CreateApiAsyncAction<ApiParams, TResponse, TPayload>> creator;
+    return <CreateApiAsyncAction<ApiParams, TPayload, TResponse>> creator;
   };

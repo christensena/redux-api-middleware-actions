@@ -2,7 +2,7 @@ import {
   Action,
   ApiAction,
   createAction, createApiAsyncAction, CreateApiAsyncAction,
-  PutApiParams,
+  PutApiParams, GetApiParams,
 } from './action-creators';
 
 interface IUserId {
@@ -34,15 +34,15 @@ describe('action-creators', () => {
   });
 
   describe('createApiAsyncAction with typed payload', () => {
-    let action: ApiAction<{}, IUser>;
+    let action: ApiAction<IUser, {}>;
     let url: string;
-    let actionCreator: CreateApiAsyncAction<PutApiParams, {}, IUser>;
+    let putUserActionCreator: CreateApiAsyncAction<PutApiParams, IUser, {}>;
 
     beforeEach(() => {
       const id = 123;
       url = `/entity/${id}`;
-      actionCreator = createApiAsyncAction<{}, IUser>('PUT_USER');
-      action = actionCreator({ url, method: 'PUT' }, { name: 'Alan' });
+      putUserActionCreator = createApiAsyncAction<IUser, {}>('PUT_USER');
+      action = putUserActionCreator({ url, method: 'PUT' }, { name: 'Alan' });
     });
 
     it('should have expected CALL_API', () => {
@@ -58,7 +58,7 @@ describe('action-creators', () => {
     });
 
     it('should recognise itself with matches', () => {
-      expect(actionCreator.matches(action)).toBeTruthy();
+      expect(putUserActionCreator.matches(action)).toBeTruthy();
     });
 
     it('should recognise success derivative with matchApiResponse', () => {
@@ -66,7 +66,7 @@ describe('action-creators', () => {
         type: 'PUT_USER_SUCCESS',
         payload: {},
       }
-      expect(actionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
+      expect(putUserActionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
     });
 
     it('should recognise failure derivative with matchesSuccessResponse', () => {
@@ -75,8 +75,54 @@ describe('action-creators', () => {
         payload: new Error('Error'),
         error: true,
       }
-      expect(actionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
+      expect(putUserActionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
     });
   });
 
+  describe('createApiAsyncAction with typed response', () => {
+    let action: ApiAction<{}, IUser>;
+    let url: string;
+    let getUserActionCreator: CreateApiAsyncAction<GetApiParams, {}, IUser>;
+
+    beforeEach(() => {
+      const id = 123;
+      url = `/entity/${id}`;
+      getUserActionCreator = createApiAsyncAction<{}, IUser>('GET_USER');
+      action = getUserActionCreator({ url, method: 'GET' });
+    });
+
+    it('should have expected CALL_API', () => {
+      expect(action).toEqual({
+        type: 'GET_USER',
+        CALL_API: {
+          endpoint: url,
+          method: 'GET',
+          types: ['GET_USER', 'GET_USER_SUCCESS', 'GET_USER_FAILURE'],
+        },
+      });
+    });
+
+    it('should recognise itself with matches', () => {
+      expect(getUserActionCreator.matches(action)).toBeTruthy();
+    });
+
+    it('should recognise success derivative with matchApiResponse', () => {
+      const responseAction = {
+        type: 'GET_USER_SUCCESS',
+        payload: {
+          name: 'Alan',
+        },
+      }
+      expect(getUserActionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
+    });
+
+    it('should recognise failure derivative with matchesSuccessResponse', () => {
+      const responseAction = {
+        type: 'GET_USER_FAILURE',
+        payload: new Error('Error'),
+        error: true,
+      }
+      expect(getUserActionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
+    });
+  });
 });
