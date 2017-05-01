@@ -2,17 +2,19 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es5",
-        "noImplicitAny": true,
-        "strictNullChecks": true,
+        "strict": true,
         "sourceMap": false,
         "outDir": "build",
-        "noImplicitThis": true,
         "baseUrl": "src",
-        "declaration": true
+        "declaration": true,
+        "lib": [
+            "es2015"
+        ]
     },
     "exclude": [
         "node_modules",
         "build",
-        ".vscode"
+        ".vscode",
+        "**/*.spec.ts"
     ]
 }
