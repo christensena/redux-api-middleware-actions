@@ -10,8 +10,9 @@
   "devDependencies": {
     "@types/jest": "^19.2.2",
     "jest": "^19.0.2",
-    "ts-jest": "^19.0.0",
-    "typescript": "^2.2.1"
+    "ts-jest": "^19.0.14",
+    "tslint": "^5.1.0",
+    "typescript": "^2.3.2"
   },
   "dependencies": {
     "redux": "^3.6.0"
