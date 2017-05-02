@@ -4,7 +4,7 @@
         "target": "es5",
         "strict": true,
         "sourceMap": false,
-        "outDir": "build",
+        "outDir": "./",
         "baseUrl": "src",
         "declaration": true,
         "lib": [
@@ -13,7 +13,7 @@
     },
     "exclude": [
         "node_modules",
-        "build",
+        "lib",
         ".vscode",
         "**/*.spec.ts"
     ]

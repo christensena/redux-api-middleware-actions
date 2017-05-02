@@ -1,20 +1,36 @@
 {
   "name": "redux-typed-async-actions",
   "version": "0.0.1",
-  "description": "Attempt to get strongly typed async actions with matching reducer helpers in Redux",
-  "main": "build/index.js",
-  "typings": "build/index.d.ts",
+  "description": "Strongly typed async Redux actions via api middleware",
+  "main": "index.js",
+  "typings": "index.d.ts",
   "author": "Alan Christensen <alan@christensen.org.nz>",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build": "rimraf lib && tsc",
+    "prepublish": "npm run build",
+    "test": "jest"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "lib"
+  ],
   "devDependencies": {
     "@types/jest": "^19.2.2",
     "jest": "^19.0.2",
+    "rimraf": "^2.6.1",
     "ts-jest": "^19.0.14",
     "tslint": "^5.1.0",
     "typescript": "^2.3.2"
   },
   "dependencies": {},
+  "keywords": [
+    "typescript",
+    "redux",
+    "middleware",
+    "async"
+  ],
   "jest": {
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"

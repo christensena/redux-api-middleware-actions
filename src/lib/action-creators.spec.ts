@@ -1,8 +1,7 @@
 import {
   Action,
   ApiAction,
-  createAction, createApiAsyncAction, CreateApiAsyncAction,
-  PutApiParams, GetApiParams,
+  createAction, createApiAction, CreateApiAsyncAction,
 } from './action-creators';
 
 interface IUserId {
@@ -36,13 +35,13 @@ describe('action-creators', () => {
   describe('createApiAsyncAction with typed payload', () => {
     let action: ApiAction<IUser, {}>;
     let url: string;
-    let putUserActionCreator: CreateApiAsyncAction<PutApiParams, IUser, {}>;
+    let putUserActionCreator: CreateApiAsyncAction<'PUT', IUser, {}>;
 
     beforeEach(() => {
       const id = 123;
       url = `/entity/${id}`;
-      putUserActionCreator = createApiAsyncAction<IUser, {}>('PUT_USER');
-      action = putUserActionCreator({ url, method: 'PUT' }, { name: 'Alan' });
+      putUserActionCreator = createApiAction<IUser, {}>('PUT_USER', url);
+      action = putUserActionCreator('PUT', { name: 'Alan' });
     });
 
     it('should have expected CALL_API', () => {
@@ -82,13 +81,13 @@ describe('action-creators', () => {
   describe('createApiAsyncAction with typed response', () => {
     let action: ApiAction<{}, IUser>;
     let url: string;
-    let getUserActionCreator: CreateApiAsyncAction<GetApiParams, {}, IUser>;
+    let getUserActionCreator: CreateApiAsyncAction<'GET', {}, IUser>;
 
     beforeEach(() => {
       const id = 123;
       url = `/entity/${id}`;
-      getUserActionCreator = createApiAsyncAction<{}, IUser>('GET_USER');
-      action = getUserActionCreator({ url, method: 'GET' });
+      getUserActionCreator = createApiAction<{}, IUser>('GET_USER', url);
+      action = getUserActionCreator('GET');
     });
 
     it('should have expected CALL_API', () => {
