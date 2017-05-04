@@ -50,7 +50,7 @@ describe('action-creators', () => {
         CALL_API: {
           endpoint: url,
           method: 'PUT',
-          types: ['PUT_USER', 'PUT_USER_SUCCESS', 'PUT_USER_FAILURE'],
+          types: ['PUT_USER_PENDING', 'PUT_USER_SUCCESS', 'PUT_USER_FAILURE'],
           body: { name: 'Alan' },
         },
       });
@@ -96,16 +96,24 @@ describe('action-creators', () => {
         CALL_API: {
           endpoint: url,
           method: 'GET',
-          types: ['GET_USER', 'GET_USER_SUCCESS', 'GET_USER_FAILURE'],
+          types: ['GET_USER_PENDING', 'GET_USER_SUCCESS', 'GET_USER_FAILURE'],
         },
       });
     });
 
-    it('should recognise itself with matches', () => {
+    it('should recognise own direct offspring with matches', () => {
       expect(getUserActionCreator.matches(action)).toBeTruthy();
     });
 
-    it('should recognise success derivative with matchApiResponse', () => {
+    it('should recognise pending derivative with matchesPending', () => {
+      const pendingAction = {
+        type: 'GET_USER_PENDING',
+        payload: {},
+      }
+      expect(getUserActionCreator.matchesPending(pendingAction)).toBeTruthy();
+    });
+
+    it('should recognise success derivative with matchesSuccessResponse', () => {
       const responseAction = {
         type: 'GET_USER_SUCCESS',
         payload: {
@@ -115,7 +123,7 @@ describe('action-creators', () => {
       expect(getUserActionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
     });
 
-    it('should recognise failure derivative with matchesSuccessResponse', () => {
+    it('should recognise failure derivative with matchesFailureResponse', () => {
       const responseAction = {
         type: 'GET_USER_FAILURE',
         payload: new Error('Error'),

@@ -25,11 +25,6 @@ export const createAction = <TPayload>(type: string): CreateAction<TPayload> => 
 
 export type HttpMethod = 'GET' | 'PUT' | 'POST' | 'DELETE' | 'OPTIONS';
 
-export interface IApiParamsWithMethod {
-  method: HttpMethod;
-}
-
-
 // TODO could break this down by method and hence exclude body from GET and DELETE
 // TODO flesh out header typing and add it to ApiAction
 export interface ApiAction<TPayload, TResponse> extends ReduxAction {
@@ -45,12 +40,14 @@ export interface ApiAction<TPayload, TResponse> extends ReduxAction {
 export interface CreateApiAsyncAction<HttpMethod, TBody, TResponse> {
   (method: HttpMethod, payload?: TBody): ApiAction<TBody, TResponse>;
   matches(action: ReduxAction): action is ApiAction<TBody, TResponse>;
+  matchesPending(action: Action<TBody>): action is Action<TBody>;
   matchesSuccessResponse(action: Action<TResponse>): action is Action<TResponse>;
   matchesFailureResponse(action: ErrorAction): action is ErrorAction;
 }
 
 export const createApiAction =
   <TBody, TResponse>(type: string, url: string): CreateApiAsyncAction<HttpMethod, TBody, TResponse> => {
+    const pendingType = `${type}_PENDING`;
     const successType = `${type}_SUCCESS`;
     const failureType = `${type}_FAILURE`;
     let creator: any = (method: HttpMethod, body: TBody): ApiAction<TBody, TResponse> => ({
@@ -58,12 +55,14 @@ export const createApiAction =
       'CALL_API': {
         endpoint: url,
         method: method,
-        types: [type, successType, failureType],
+        types: [pendingType, successType, failureType],
         body,
       },
     });
     creator.matches =
       <TResponse>(action: ReduxAction): action is ApiAction<TBody, TResponse> => action.type === type;
+    creator.matchesPending =
+      (action: Action<TBody>): action is Action<TBody> => action.type === pendingType;
     creator.matchesSuccessResponse =
       (action: Action<TResponse>): action is Action<TResponse> => action.type === successType;
     creator.matchesFailureResponse =
