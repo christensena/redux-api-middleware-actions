@@ -5,7 +5,6 @@
         "strict": true,
         "sourceMap": false,
         "outDir": "./",
-        "baseUrl": "src",
         "declaration": true,
         "lib": [
             "es2015"
