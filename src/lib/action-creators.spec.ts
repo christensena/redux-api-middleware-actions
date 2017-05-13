@@ -1,7 +1,8 @@
+import { CALL_API, validateRSAA } from 'redux-api-middleware';
 import {
   Action,
   ApiAction,
-  createAction, createApiAction, CreateApiAsyncAction,
+  createAction, createApiAction, CreateApiAsyncAction, CreateAction,
 } from './action-creators';
 
 interface IUserId {
@@ -16,9 +17,10 @@ describe('action-creators', () => {
 
   describe('createAction with typed payload', () => {
     let action: Action<IUserId>;
+    let actionCreator: CreateAction<IUserId>
 
     beforeEach(() => {
-      const actionCreator = createAction<IUserId>('ACTION_NAME');
+      actionCreator = createAction<IUserId>('ACTION_NAME');
       action = actionCreator({ id: 123 });
     });
 
@@ -30,34 +32,46 @@ describe('action-creators', () => {
         },
       });
     });
+
+    it('should recognise itself', () => {
+      expect(actionCreator.matches(action)).toBe(true);
+    })
   });
 
   describe('createApiAsyncAction with typed payload', () => {
     let action: ApiAction<IUser, {}>;
-    let url: string;
-    let putUserActionCreator: CreateApiAsyncAction<'PUT', IUser, {}>;
+    let endpoint: string;
+    let actionCreator: CreateApiAsyncAction<IUser, {}>;
+    let payload: IUser;
 
     beforeEach(() => {
       const id = 123;
-      url = `/entity/${id}`;
-      putUserActionCreator = createApiAction<IUser, {}>('PUT_USER', url);
-      action = putUserActionCreator('PUT', { name: 'Alan' });
+      endpoint = `/entity/${id}`;
+      actionCreator = createApiAction<IUser, {}>('PUT_USER', { CALL_API, method: 'PUT', endpoint });
+
+      payload = { name: 'Alan' };
+      action = actionCreator(payload);
     });
 
     it('should have expected CALL_API', () => {
-      expect(action).toEqual({
-        type: 'PUT_USER',
-        CALL_API: {
-          endpoint: url,
-          method: 'PUT',
-          types: ['PUT_USER_PENDING', 'PUT_USER_SUCCESS', 'PUT_USER_FAILURE'],
-          body: { name: 'Alan' },
-        },
+      expect(action[CALL_API]).toEqual({
+        endpoint: endpoint,
+        method: 'PUT',
+        types: ['PUT_USER_PENDING', 'PUT_USER_SUCCESS', 'PUT_USER_FAILURE'],
+        body: { name: 'Alan' },
       });
     });
 
-    it('should recognise itself with matches', () => {
-      expect(putUserActionCreator.matches(action)).toBeTruthy();
+    it('should validate as RSAA', () => {
+      expect(validateRSAA(action)).toHaveLength(0);
+    });
+
+    it('should recognise pending derivative with matchApiResponse', () => {
+      const pendingAction = {
+        type: 'PUT_USER_PENDING',
+        payload,
+      }
+      expect(actionCreator.matchesPending(pendingAction)).toBe(true);
     });
 
     it('should recognise success derivative with matchApiResponse', () => {
@@ -65,7 +79,7 @@ describe('action-creators', () => {
         type: 'PUT_USER_SUCCESS',
         payload: {},
       }
-      expect(putUserActionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
+      expect(actionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
     });
 
     it('should recognise failure derivative with matchesSuccessResponse', () => {
@@ -74,35 +88,28 @@ describe('action-creators', () => {
         payload: new Error('Error'),
         error: true,
       }
-      expect(putUserActionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
+      expect(actionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
     });
   });
 
   describe('createApiAsyncAction with typed response', () => {
     let action: ApiAction<{}, IUser>;
-    let url: string;
-    let getUserActionCreator: CreateApiAsyncAction<'GET', {}, IUser>;
+    let endpoint: string;
+    let actionCreator: CreateApiAsyncAction<{}, IUser>;
 
     beforeEach(() => {
       const id = 123;
-      url = `/entity/${id}`;
-      getUserActionCreator = createApiAction<{}, IUser>('GET_USER', url);
-      action = getUserActionCreator('GET');
+      endpoint = `/entity/${id}`;
+      actionCreator = createApiAction<{}, IUser>('GET_USER', { CALL_API, method: 'GET', endpoint });
+      action = actionCreator();
     });
 
     it('should have expected CALL_API', () => {
-      expect(action).toEqual({
-        type: 'GET_USER',
-        CALL_API: {
-          endpoint: url,
-          method: 'GET',
-          types: ['GET_USER_PENDING', 'GET_USER_SUCCESS', 'GET_USER_FAILURE'],
-        },
+      expect(action[CALL_API]).toEqual({
+        endpoint,
+        method: 'GET',
+        types: ['GET_USER_PENDING', 'GET_USER_SUCCESS', 'GET_USER_FAILURE'],
       });
-    });
-
-    it('should recognise own direct offspring with matches', () => {
-      expect(getUserActionCreator.matches(action)).toBeTruthy();
     });
 
     it('should recognise pending derivative with matchesPending', () => {
@@ -110,7 +117,7 @@ describe('action-creators', () => {
         type: 'GET_USER_PENDING',
         payload: {},
       }
-      expect(getUserActionCreator.matchesPending(pendingAction)).toBeTruthy();
+      expect(actionCreator.matchesPending(pendingAction)).toBeTruthy();
     });
 
     it('should recognise success derivative with matchesSuccessResponse', () => {
@@ -120,7 +127,7 @@ describe('action-creators', () => {
           name: 'Alan',
         },
       }
-      expect(getUserActionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
+      expect(actionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
     });
 
     it('should recognise failure derivative with matchesFailureResponse', () => {
@@ -129,7 +136,30 @@ describe('action-creators', () => {
         payload: new Error('Error'),
         error: true,
       }
-      expect(getUserActionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
+      expect(actionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
+    });
+  });
+
+  describe('createApiAsyncAction with function options', () => {
+    let action: ApiAction<{ name: string }, IUser>;
+    let actionCreator: CreateApiAsyncAction<{ name: string }, IUser>;
+    let userName = 'Fred';
+
+    beforeEach(() => {
+      actionCreator = createApiAction<{ name: string }, IUser>('GET_USER', ({ name }) => ({
+        CALL_API,
+        method: 'GET',
+        endpoint: `/users/${name}`,
+      }));
+      action = actionCreator({ name: userName });
+    });
+
+    it('should have expected CALL_API', () => {
+      expect(action[CALL_API]).toEqual({
+        endpoint: `/users/${userName}`,
+        method: 'GET',
+        types: ['GET_USER_PENDING', 'GET_USER_SUCCESS', 'GET_USER_FAILURE'],
+      });
     });
   });
 });

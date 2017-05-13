@@ -19,53 +19,58 @@ export interface CreateAction<TPayload> extends Action<TPayload> {
 
 export const createAction = <TPayload>(type: string): CreateAction<TPayload> => {
   let creator: any = <TPayload>(payload?: TPayload) => ({ type, payload });
-  creator.matchAction = <TPayload>(action: ReduxAction): action is Action<TPayload> => action.type === type;
+  creator.matches = <TPayload>(action: ReduxAction): action is Action<TPayload> => action.type === type;
   return <CreateAction<TPayload>>creator;
 };
 
 export type HttpMethod = 'GET' | 'PUT' | 'POST' | 'DELETE' | 'OPTIONS';
 
-// TODO could break this down by method and hence exclude body from GET and DELETE
-// TODO flesh out header typing and add it to ApiAction
-export interface ApiAction<TPayload, TResponse> extends ReduxAction {
-  'CALL_API': {
+export interface ApiAction<TPayload, TResponse> {
+  [propName: string]: {
     endpoint: string;
-    method: HttpMethod;
+    method: string;
     types: string[];
     body?: any;
     headers?: any;
-  },
+  } | string,
 }
 
-export interface CreateApiAsyncAction<HttpMethod, TBody, TResponse> {
-  (method: HttpMethod, payload?: TBody): ApiAction<TBody, TResponse>;
-  matches(action: ReduxAction): action is ApiAction<TBody, TResponse>;
-  matchesPending(action: Action<TBody>): action is Action<TBody>;
+export interface IApiActionOptions {
+  CALL_API: any;
+  method: HttpMethod;
+  endpoint: string;
+}
+
+export interface CreateApiAsyncAction<TPayload, TResponse> {
+  (payload?: TPayload): ApiAction<TPayload, TResponse>;
+  matches(action: any): action is ApiAction<TPayload, TResponse>;
+  matchesPending(action: Action<TPayload>): action is Action<TPayload>;
   matchesSuccessResponse(action: Action<TResponse>): action is Action<TResponse>;
   matchesFailureResponse(action: ErrorAction): action is ErrorAction;
 }
 
 export const createApiAction =
-  <TBody, TResponse>(type: string, url: string): CreateApiAsyncAction<HttpMethod, TBody, TResponse> => {
+  <TPayload, TResponse>(type: string, options: ((payload: TPayload) => IApiActionOptions) | IApiActionOptions): CreateApiAsyncAction<TPayload, TResponse> => {
     const pendingType = `${type}_PENDING`;
     const successType = `${type}_SUCCESS`;
     const failureType = `${type}_FAILURE`;
-    let creator: any = (method: HttpMethod, body: TBody): ApiAction<TBody, TResponse> => ({
-      type,
-      'CALL_API': {
-        endpoint: url,
-        method: method,
-        types: [pendingType, successType, failureType],
-        body,
-      },
-    });
-    creator.matches =
-      <TResponse>(action: ReduxAction): action is ApiAction<TBody, TResponse> => action.type === type;
+
+    let creator: any = (payload: TPayload): ApiAction<TPayload, TResponse> => {
+      const { CALL_API, method, endpoint } = typeof (options) === 'function' ? options(payload) : options;
+      return {
+        [CALL_API]: {
+          endpoint,
+          method,
+          types: [pendingType, successType, failureType],
+          body: method === 'POST' || method === 'PUT' ? payload : undefined,
+        },
+      }
+    };
     creator.matchesPending =
-      (action: Action<TBody>): action is Action<TBody> => action.type === pendingType;
+      (action: Action<TPayload>): action is Action<TPayload> => action.type === pendingType;
     creator.matchesSuccessResponse =
       (action: Action<TResponse>): action is Action<TResponse> => action.type === successType;
     creator.matchesFailureResponse =
       (action: ErrorAction): action is ErrorAction => action.type === failureType;
-    return <CreateApiAsyncAction<HttpMethod, TBody, TResponse>>creator;
+    return <CreateApiAsyncAction<TPayload, TResponse>>creator;
   };

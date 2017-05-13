@@ -19,6 +19,7 @@
   "devDependencies": {
     "@types/jest": "^19.2.2",
     "jest": "^19.0.2",
+    "redux-api-middleware": "^1.0.3",
     "rimraf": "^2.6.1",
     "ts-jest": "^19.0.14",
     "tslint": "^5.2.0",
