@@ -1,11 +1,15 @@
 {
-  "name": "redux-typed-async-actions",
+  "name": "redux-api-middleware-actions",
   "version": "0.0.1",
-  "description": "Strongly typed async Redux actions via api middleware",
+  "description": "Strongly typed action creator functions for redux-api-middleware and similar",
   "main": "index.js",
   "typings": "typings/index.d.ts",
   "author": "Alan Christensen <alan@christensen.org.nz>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christensena/redux-api-middleware-actions.git"
+  },
   "scripts": {
     "build": "rimraf lib typings && tsc",
     "prepublish": "npm run build",
