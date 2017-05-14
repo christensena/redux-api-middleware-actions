@@ -3,18 +3,18 @@
   "version": "0.0.1",
   "description": "Strongly typed async Redux actions via api middleware",
   "main": "index.js",
-  "typings": "index.d.ts",
+  "typings": "typings/index.d.ts",
   "author": "Alan Christensen <alan@christensen.org.nz>",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf lib && tsc",
+    "build": "rimraf lib typings && tsc",
     "prepublish": "npm run build",
     "test": "jest"
   },
   "files": [
     "index.js",
-    "index.d.ts",
-    "lib"
+    "lib",
+    "typings"
   ],
   "devDependencies": {
     "@types/jest": "^19.2.2",

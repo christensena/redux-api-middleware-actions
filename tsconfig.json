@@ -6,6 +6,7 @@
         "sourceMap": false,
         "outDir": "./",
         "declaration": true,
+        "declarationDir": "typings",
         "lib": [
             "es2015"
         ]
@@ -14,7 +15,6 @@
         "node_modules",
         "lib",
         ".vscode",
-        "index.d.ts",
         "**/*.spec.ts"
     ]
 }
