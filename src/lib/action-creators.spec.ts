@@ -179,4 +179,47 @@ describe('action-creators', () => {
       });
     });
   });
+
+  describe('createApiAction with overrides', () => {
+    let action: ApiAction<{ prefix: string }, IUser[]>;
+    let actionCreator: CreateApiAsyncAction<{ prefix: string }, IUser[]>;
+    let prefix = 'Fre';
+    let addOn: any;
+
+    beforeEach(() => {
+      addOn = {
+        meta: {
+          debounce: {
+            key: 'User Search',
+            time: 500,
+          },
+        }
+      };
+
+      actionCreator = createApiAction<{ prefix: string }, IUser[]>('USER_SEARCH', ({ prefix }) => ({
+        CALL_API,
+        method: 'GET',
+        endpoint: `/users/search?prefix=${prefix}`,
+      }), addOn);
+      action = actionCreator({ prefix });
+    });
+
+    it('should have expected CALL_API', () => {
+      expect(action[CALL_API]).toEqual({
+        endpoint: `/users/search?prefix=${prefix}`,
+        method: 'GET',
+        types: ['USER_SEARCH_PENDING', 'USER_SEARCH_SUCCESS', 'USER_SEARCH_FAILURE'],
+      });
+    });
+
+    it('should have override bits added', () => {
+      expect(action.meta).toEqual(addOn.meta);
+    });
+
+    // this will fail as RSAA is a redux-api-middleware thing
+    // but some users will use their own similar library that doesn't have this restriction
+    // it('should validate as RSAA', () => {
+    //   expect(validateRSAA(action)).toHaveLength(0);
+    // });
+  });
 });

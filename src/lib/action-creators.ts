@@ -65,8 +65,10 @@ export type CreateApiActionOptions<TPayload> =
   IApiActionOptions |
   ((payload: TPayload) => IApiActionOptions);
 
+// NOTE: don't use addOn if using redux-api-middleware as it is fussy and will reject the action
+// use for custom api middleware
 export const createApiAction =
-  <TPayload, TResponse>(type: string, options: CreateApiActionOptions<TPayload>): CreateApiAsyncAction<TPayload, TResponse> => {
+  <TPayload, TResponse>(type: string, options: CreateApiActionOptions<TPayload>, addOn?: any): CreateApiAsyncAction<TPayload, TResponse> => {
     const pendingType = `${type}_PENDING`;
     const successType = `${type}_SUCCESS`;
     const failureType = `${type}_FAILURE`;
@@ -83,6 +85,7 @@ export const createApiAction =
           credentials,
           headers,
         },
+        ...addOn,
       }
     };
     creator.type = type;
