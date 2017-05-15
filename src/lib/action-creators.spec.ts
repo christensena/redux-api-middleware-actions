@@ -66,7 +66,24 @@ describe('action-creators', () => {
       expect(validateRSAA(action)).toHaveLength(0);
     });
 
-    it('should recognise pending derivative with matchApiResponse', () => {
+    it('should recognise all derivatives with matches', () => {
+      expect(actionCreator.matches({
+        type: 'PUT_USER_PENDING',
+        payload,
+      })).toBe(true);
+
+      expect(actionCreator.matches({
+        type: 'PUT_USER_SUCCESS',
+        payload,
+      })).toBe(true);
+
+      expect(actionCreator.matches({
+        type: 'PUT_USER_FAILURE',
+        payload,
+      })).toBe(true);
+    });
+
+    it('should recognise pending derivative with matchesPending', () => {
       const pendingAction = {
         type: 'PUT_USER_PENDING',
         payload,
@@ -74,25 +91,25 @@ describe('action-creators', () => {
       expect(actionCreator.matchesPending(pendingAction)).toBe(true);
     });
 
-    it('should recognise success derivative with matchApiResponse', () => {
+    it('should recognise success derivative with matchesSuccess', () => {
       const responseAction = {
         type: 'PUT_USER_SUCCESS',
         payload: {},
       }
-      expect(actionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
+      expect(actionCreator.matchesSuccess(responseAction)).toBeTruthy();
     });
 
-    it('should recognise failure derivative with matchesSuccessResponse', () => {
+    it('should recognise failure derivative with matchesFailure', () => {
       const responseAction = {
         type: 'PUT_USER_FAILURE',
         payload: new Error('Error'),
         error: true,
       }
-      expect(actionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
+      expect(actionCreator.matchesFailure(responseAction)).toBeTruthy();
     });
   });
 
-  describe('createApiAsyncAction with typed response', () => {
+  describe('createApiAction with typed response', () => {
     let action: ApiAction<{}, IUser>;
     let endpoint: string;
     let actionCreator: CreateApiAsyncAction<{}, IUser>;
@@ -120,27 +137,27 @@ describe('action-creators', () => {
       expect(actionCreator.matchesPending(pendingAction)).toBeTruthy();
     });
 
-    it('should recognise success derivative with matchesSuccessResponse', () => {
+    it('should recognise success derivative with matchesSuccess', () => {
       const responseAction = {
         type: 'GET_USER_SUCCESS',
         payload: {
           name: 'Alan',
         },
       }
-      expect(actionCreator.matchesSuccessResponse(responseAction)).toBeTruthy();
+      expect(actionCreator.matchesSuccess(responseAction)).toBeTruthy();
     });
 
-    it('should recognise failure derivative with matchesFailureResponse', () => {
+    it('should recognise failure derivative with matchesFailure', () => {
       const responseAction = {
         type: 'GET_USER_FAILURE',
         payload: new Error('Error'),
         error: true,
       }
-      expect(actionCreator.matchesFailureResponse(responseAction)).toBeTruthy();
+      expect(actionCreator.matchesFailure(responseAction)).toBeTruthy();
     });
   });
 
-  describe('createApiAsyncAction with function options', () => {
+  describe('createApiAction with function options', () => {
     let action: ApiAction<{ name: string }, IUser>;
     let actionCreator: CreateApiAsyncAction<{ name: string }, IUser>;
     let userName = 'Fred';

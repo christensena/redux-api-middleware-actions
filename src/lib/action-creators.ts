@@ -54,10 +54,10 @@ export interface IApiActionOptions {
 
 export interface CreateApiAsyncAction<TPayload, TResponse> {
   (payload?: TPayload): ApiAction<TPayload, TResponse>;
-  matches(action: any): action is ApiAction<TPayload, TResponse>;
+  matches(action: Action<any>): action is Action<any>;
   matchesPending(action: Action<TPayload>): action is Action<TPayload>;
-  matchesSuccessResponse(action: Action<TResponse>): action is Action<TResponse>;
-  matchesFailureResponse(action: Action<any>): action is ErrorAction;
+  matchesSuccess(action: Action<TResponse>): action is Action<TResponse>;
+  matchesFailure(action: Action<any>): action is ErrorAction;
   type: string;
 }
 
@@ -86,11 +86,13 @@ export const createApiAction =
       }
     };
     creator.type = type;
+    creator.matches = (action: Action<any>): action is Action<any> =>
+      action.type === pendingType || action.type === successType || action.type === failureType;
     creator.matchesPending =
       (action: Action<TPayload>): action is Action<TPayload> => action.type === pendingType;
-    creator.matchesSuccessResponse =
+    creator.matchesSuccess =
       (action: Action<TResponse>): action is Action<TResponse> => action.type === successType;
-    creator.matchesFailureResponse =
+    creator.matchesFailure =
       (action: Action<any>): action is ErrorAction => action.type === failureType;
     return <CreateApiAsyncAction<TPayload, TResponse>>creator;
   };
