@@ -20,6 +20,8 @@ yarn add redux-api-middleware-actions
 
 Assuming you have already set up your api middleware (in this example [https://github.com/agraboso/redux-api-middleware](https://github.com/agraboso/redux-api-middleware)
 
+## In action creators
+
 ```ts
 import { createApiAction } from 'redux-typed-async-actions';
 import { CALL_API } from 'redux-api-middleware';
@@ -60,4 +62,21 @@ export const fetchClients = createApiAction<{ name: string }, IClientModel[]>('F
   method: 'POST',
   endpoint: `/api/clients?name=${name}`,
 });
+```
+
+## In Reducers
+
+You can then use action creators themselves to match actions and strongly type the `action.payload` (on `success` it is the `TResponse` you defined in the action creator.
+
+```ts
+ if (actions.fetchClients.matchesSuccessResponse(action)) {
+    return {
+      ...state,
+      list: action.payload,
+    };
+  } else if (actions.fetchClients.matchesPending(action)) {
+    ...
+  } else if (actions.fetchClients.matchesFailureResponse(action)) {
+    ...
+  }
 ```
