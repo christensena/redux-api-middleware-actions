@@ -61,22 +61,22 @@ export const fetchClients = createApiAction<{ name: string }, IClientModel[]>('F
   CALL_API,
   method: 'POST',
   endpoint: `/api/clients?name=${name}`,
-});
+}));
 ```
 
 ## In Reducers
 
-You can then use action creators themselves to match actions and strongly type the `action.payload` (on `success` it is the `TResponse` you defined in the action creator.
+You can then use action creators themselves to match actions and strongly type the `action.payload` (on `success` it is the response from the api, of type `TResponse` you defined in the action creator).
 
 ```ts
- if (actions.fetchClients.matchesSuccessResponse(action)) {
+ if (actions.fetchClients.matchesSuccess(action)) {
     return {
       ...state,
       list: action.payload,
     };
   } else if (actions.fetchClients.matchesPending(action)) {
     ...
-  } else if (actions.fetchClients.matchesFailureResponse(action)) {
+  } else if (actions.fetchClients.matchesFailure(action)) {
     ...
   }
 ```
