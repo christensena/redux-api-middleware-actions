@@ -22,6 +22,7 @@
   ],
   "devDependencies": {
     "@types/jest": "^19.2.2",
+    "@types/redux": "^3.6.0",
     "jest": "^19.0.2",
     "redux-api-middleware": "^1.0.3",
     "rimraf": "^2.6.1",
@@ -29,7 +30,11 @@
     "tslint": "^5.2.0",
     "typescript": "^2.3.2"
   },
-  "dependencies": {},
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "redux": "^3.7.1"
+  },
   "keywords": [
     "typescript",
     "redux",
