@@ -1,6 +1,6 @@
 {
   "name": "redux-api-middleware-actions",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Strongly typed action creator functions for redux-api-middleware and similar",
   "main": "index.js",
   "typings": "typings/index.d.ts",
